@@ -1,0 +1,1235 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CareSoft Clinic{% endblock %}
+
+{% block extra_css %}
+.dashboard-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.dashboard-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, #0369a1 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    color: white;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.welcome-msg {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.role-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.stat-val {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Sections Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (max-width: 868px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+}
+
+/* Tables */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.925rem;
+}
+
+.dash-table th {
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border);
+    letter-spacing: 0.05em;
+}
+
+.dash-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.dash-table tr:hover td {
+    background: rgba(15, 118, 110, 0.02);
+}
+
+/* Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+.badge.scheduled { background: #e0f2fe; color: #0369a1; }
+.badge.confirmed { background: #d1fae5; color: #065f46; }
+.badge.completed { background: #ccfbf1; color: #0f766e; }
+.badge.cancelled { background: #fee2e2; color: #991b1b; }
+.badge.noshow { background: #fef3c7; color: #92400e; }
+
+/* Dashboard Actions */
+.btn-action-cancel {
+    background: none;
+    border: 1px solid #fee2e2;
+    color: var(--error);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-action-cancel:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+}
+
+.btn-action-edit {
+    background: none;
+    border: 1px solid #e0f2fe;
+    color: #0284c7;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-action-edit:hover {
+    background: #0284c7;
+    color: white;
+    border-color: #0284c7;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin-top: 0;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 90%;
+    padding: 2rem;
+    position: relative;
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.medical-record-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.record-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+.record-diag {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+.record-pres {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background: #f1f5f9;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    margin-bottom: 0.5rem;
+}
+.record-notes {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Hero Header -->
+    <div class="dashboard-hero">
+        <div>
+            <h1 class="welcome-msg">Welcome, <span id="dash-user-name">Loading...</span>!</h1>
+            <p style="margin-top: 0.25rem; opacity: 0.9;">Manage clinic data, view records, and configure schedules.</p>
+        </div>
+        <span class="role-badge" id="dash-role-badge">Patient</span>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- 1. PATIENT DASHBOARD PANEL -->
+    <!-- ============================================= -->
+    <div id="panel-patient" class="dashboard-panel hidden">
+        <div class="dashboard-grid">
+            <!-- Left Area: Appointments & History -->
+            <div>
+                <!-- Upcoming visits -->
+                <div class="panel-section">
+                    <div class="section-title">
+                        <span>Upcoming Consultations</span>
+                        <a href="/book-page" class="btn-primary btn-small">Book New Slot</a>
+                    </div>
+                    <div id="patient-upcoming" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Past visits -->
+                <div class="panel-section">
+                    <div class="section-title">Appointment History</div>
+                    <div id="patient-history" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Medical Records -->
+                <div class="panel-section">
+                    <div class="section-title">My Medical History & Prescriptions</div>
+                    <div id="patient-records">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Area: Profile Settings -->
+            <div>
+                <div class="panel-section">
+                    <div class="section-title">My Health Profile</div>
+                    <form id="patient-profile-form">
+                        <div class="form-group">
+                            <label class="form-label" for="profile-age">Age</label>
+                            <input type="number" id="profile-age" name="age" class="form-control" placeholder="E.g., 25" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-gender">Gender</label>
+                            <select id="profile-gender" name="gender" class="form-control" required>
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-phone">Phone Number</label>
+                            <input type="text" id="profile-phone" name="phone" class="form-control" placeholder="E.g. 555-1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-address">Address</label>
+                            <input type="text" id="profile-address" name="address" class="form-control" placeholder="Street Address, City" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-notes">Allergies/Medical Notes</label>
+                            <textarea id="profile-notes" name="medical_notes" class="form-control" placeholder="Asthma, allergies, notes..." rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- 2. DOCTOR DASHBOARD PANEL -->
+    <!-- ============================================= -->
+    <div id="panel-doctor" class="dashboard-panel hidden">
+        <div class="dashboard-grid">
+            <!-- Left Area: Schedule & History -->
+            <div>
+                <!-- Today's List -->
+                <div class="panel-section">
+                    <div class="section-title">Today's Schedule</div>
+                    <div id="doctor-today" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Upcoming consultations -->
+                <div class="panel-section">
+                    <div class="section-title">All Scheduled Bookings</div>
+                    <div id="doctor-upcoming" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Patient History Search & Record addition -->
+                <div class="panel-section">
+                    <div class="section-title">Patient Records & Diagnostic Logs</div>
+                    <div id="doctor-patients" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Area: Availability Configuration -->
+            <div>
+                <div class="panel-section">
+                    <div class="section-title">My Clinic Availability</div>
+                    <form id="doctor-schedule-form">
+                        <div class="form-group">
+                            <label class="form-label" for="doc-specialization">Specialization</label>
+                            <input type="text" id="doc-specialization" name="specialization" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="doc-qualification">Qualifications</label>
+                            <input type="text" id="doc-qualification" name="qualification" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="doc-phone">Phone Contact</label>
+                            <input type="text" id="doc-phone" name="phone" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="doc-days">Available Days (Comma-separated)</label>
+                            <input type="text" id="doc-days" name="available_days" class="form-control" placeholder="Monday,Tuesday,Wednesday" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="doc-slots">Available Hours (Comma-separated)</label>
+                            <input type="text" id="doc-slots" name="available_time_slots" class="form-control" placeholder="09:00,10:00,11:00" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 1rem;">Update Profile & Days</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- 3. ADMIN DASHBOARD PANEL -->
+    <!-- ============================================= -->
+    <div id="panel-admin" class="dashboard-panel hidden">
+        <!-- Stats summary cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="stat-patients">0</div>
+                <div class="stat-label">Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-doctors">0</div>
+                <div class="stat-label">Doctors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-appointments">0</div>
+                <div class="stat-label">Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-pending">0</div>
+                <div class="stat-label">Scheduled</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Area: Management tables -->
+            <div>
+                <!-- Doctor List -->
+                <div class="panel-section">
+                    <div class="section-title">Clinic Doctors</div>
+                    <div id="admin-doctors" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- User Accounts Manager -->
+                <div class="panel-section">
+                    <div class="section-title">System Users</div>
+                    <div id="admin-users" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Reminder simulator controls -->
+                <div class="panel-section">
+                    <div class="section-title">
+                        <span>Reminder Service logs</span>
+                        <button onclick="triggerReminders()" class="btn-primary btn-small">Detect & Send Reminders</button>
+                    </div>
+                    <div id="admin-reminders" class="table-responsive">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Area: Add Doctor form -->
+            <div>
+                <div class="panel-section">
+                    <div class="section-title">Add Clinic Doctor</div>
+                    <form id="admin-add-doctor-form">
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-name">Full Name</label>
+                            <input type="text" id="add-doc-name" name="name" class="form-control" placeholder="Dr. Jane Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-email">Email Address</label>
+                            <input type="email" id="add-doc-email" name="email" class="form-control" placeholder="jane.smith@caresoft.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-password">Temporary Password</label>
+                            <input type="password" id="add-doc-password" name="password" class="form-control" placeholder="Doctor@12345" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-phone">Phone</label>
+                            <input type="text" id="add-doc-phone" name="phone" class="form-control" placeholder="555-0122" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-specialization">Specialization</label>
+                            <input type="text" id="add-doc-specialization" name="specialization" class="form-control" placeholder="Pediatrics" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-qualification">Qualification</label>
+                            <input type="text" id="add-doc-qualification" name="qualification" class="form-control" placeholder="MD, Ph.D." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-days">Available Days</label>
+                            <input type="text" id="add-doc-days" name="available_days" class="form-control" value="Monday,Tuesday,Wednesday,Thursday,Friday" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="add-doc-slots">Available Hours</label>
+                            <input type="text" id="add-doc-slots" name="available_time_slots" class="form-control" value="09:00,10:00,11:00,14:00,15:00" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 1rem;">Register Doctor</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MODALS -->
+<!-- ============================================= -->
+
+<!-- Modal: Add Medical Record (For Doctor) -->
+<div id="modal-record" class="modal hidden">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeRecordModal()">&times;</button>
+        <h3 class="card-title" style="margin-bottom: 1rem;">Create Medical Record</h3>
+        <form id="doc-record-form">
+            <input type="hidden" id="record-patient-id" name="patient_id">
+            
+            <div class="form-group">
+                <label class="form-label">Patient Name</label>
+                <input type="text" id="record-patient-name" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="record-visit-date">Visit Date</label>
+                <input type="date" id="record-visit-date" name="visit_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="record-diagnosis">Diagnosis</label>
+                <input type="text" id="record-diagnosis" name="diagnosis" class="form-control" placeholder="Acute respiratory tract infection" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="record-prescription">Prescriptions / Drugs</label>
+                <textarea id="record-prescription" name="prescription" class="form-control" placeholder="E.g. Amoxicillin 500mg, 3x daily" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="record-notes">Doctor Notes</label>
+                <textarea id="record-notes" name="notes" class="form-control" placeholder="Rest for 3 days, drink lots of water..." rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Add Record to History</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Doctor Availability (For Admin/Doctor) -->
+<div id="modal-doctor" class="modal hidden">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeDoctorModal()">&times;</button>
+        <h3 class="card-title" style="margin-bottom: 1rem;">Edit Doctor Profile</h3>
+        <form id="edit-doctor-form">
+            <input type="hidden" id="edit-doc-id">
+            <div class="form-group">
+                <label class="form-label" for="edit-doc-phone">Phone</label>
+                <input type="text" id="edit-doc-phone" name="phone" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-doc-specialization">Specialization</label>
+                <input type="text" id="edit-doc-specialization" name="specialization" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-doc-qualification">Qualification</label>
+                <input type="text" id="edit-doc-qualification" name="qualification" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-doc-days">Available Days</label>
+                <input type="text" id="edit-doc-days" name="available_days" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-doc-slots">Available Time Slots</label>
+                <input type="text" id="edit-doc-slots" name="available_time_slots" class="form-control" required>
+            </div>
+            <button type="submit" class="btn-primary">Save Profile</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("userRole");
+        const name = localStorage.getItem("userName");
+
+        if (!token) {
+            showToast("Access denied. Please log in first.", "error");
+            setTimeout(() => {
+                window.location.href = "/login-page";
+            }, 1000);
+            return;
+        }
+
+        document.getElementById("dash-user-name").textContent = name;
+        document.getElementById("dash-role-badge").textContent = role;
+
+        // Display correct dashboard based on role
+        if (role === "admin") {
+            document.getElementById("panel-admin").classList.remove("hidden");
+            loadAdminDashboard();
+        } else if (role === "doctor") {
+            document.getElementById("panel-doctor").classList.remove("hidden");
+            loadDoctorDashboard();
+        } else {
+            document.getElementById("panel-patient").classList.remove("hidden");
+            loadPatientDashboard();
+        }
+    });
+
+    // Format Date helper
+    function formatDate(dStr) {
+        try {
+            const date = new Date(dStr);
+            return date.toLocaleDateString("en-US", {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dStr;
+        }
+    }
+
+    // =============================================
+    // PATIENT DASHBOARD SCRIPTS
+    // =============================================
+    async function loadPatientDashboard() {
+        try {
+            const response = await fetchWithAuth("/api/dashboard/patient");
+            if (!response.ok) throw new Error("Fetch failed");
+            const data = await response.json();
+
+            // Populate Profile fields
+            const p = data.patient_profile;
+            if (p.age) document.getElementById("profile-age").value = p.age;
+            if (p.gender) document.getElementById("profile-gender").value = p.gender;
+            if (p.phone) document.getElementById("profile-phone").value = p.phone;
+            if (p.address) document.getElementById("profile-address").value = p.address;
+            if (p.medical_notes) document.getElementById("profile-notes").value = p.medical_notes;
+
+            // Populate Upcoming
+            const upcomingDiv = document.getElementById("patient-upcoming");
+            if (data.upcoming_visits.length === 0) {
+                upcomingDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No upcoming appointments booked.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialty</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.upcoming_visits.forEach(v => {
+                    html += `
+                        <tr>
+                            <td><strong>${v.doctor_name}</strong></td>
+                            <td>${v.specialization}</td>
+                            <td>${formatDate(v.date)}</td>
+                            <td>${v.time}</td>
+                            <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
+                            <td><button onclick="cancelAppointment(${v.id}, 'patient')" class="btn-action-cancel">Cancel</button></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                upcomingDiv.innerHTML = html;
+            }
+
+            // Populate History
+            const historyDiv = document.getElementById("patient-history");
+            if (data.appointment_history.length === 0) {
+                historyDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No past appointment sessions.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialty</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.appointment_history.forEach(v => {
+                    html += `
+                        <tr>
+                            <td><strong>${v.doctor_name}</strong></td>
+                            <td>${v.specialization}</td>
+                            <td>${formatDate(v.date)}</td>
+                            <td>${v.time}</td>
+                            <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                historyDiv.innerHTML = html;
+            }
+
+            // Populate Records
+            const recordsDiv = document.getElementById("patient-records");
+            if (data.medical_records.length === 0) {
+                recordsDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No diagnostic health history files yet.</p>`;
+            } else {
+                let html = "";
+                data.medical_records.forEach(r => {
+                    html += `
+                        <div class="medical-record-card">
+                            <div class="record-meta">
+                                <span>Doctor: ${r.doctor_name} (${r.specialization})</span>
+                                <span>Date: ${formatDate(r.visit_date)}</span>
+                            </div>
+                            <div class="record-diag">${r.diagnosis}</div>
+                            <div class="record-pres">Rx: ${r.prescription || 'No prescriptions logged'}</div>
+                            <div class="record-notes">Notes: ${r.notes || 'No doctor advice logged'}</div>
+                        </div>
+                    `;
+                });
+                recordsDiv.innerHTML = html;
+            }
+
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to load health history.", "error");
+        }
+    }
+
+    // Submit patient profile
+    document.getElementById("patient-profile-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        try {
+            const response = await fetchWithAuth("/api/patients/profile", {
+                method: "PUT",
+                body: formData
+            });
+            if (response.ok) {
+                showToast("Health profile updated successfully!", "success");
+                loadPatientDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Update profile failed", "error");
+            }
+        } catch (err) {
+            showToast("Error updating patient profile.", "error");
+        }
+    });
+
+    // =============================================
+    // DOCTOR DASHBOARD SCRIPTS
+    // =============================================
+    async function loadDoctorDashboard() {
+        try {
+            const response = await fetchWithAuth("/api/dashboard/doctor");
+            if (!response.ok) throw new Error("Fetch failed");
+            const data = await response.json();
+
+            // Populate Availability fields
+            const d = data.doctor_profile;
+            document.getElementById("doc-specialization").value = d.specialization;
+            document.getElementById("doc-qualification").value = d.qualification || "";
+            document.getElementById("doc-phone").value = d.phone || "";
+            document.getElementById("doc-days").value = d.available_days;
+            document.getElementById("doc-slots").value = d.available_time_slots;
+
+            // Today's appointments
+            const todayDiv = document.getElementById("doctor-today");
+            if (data.today_appointments.length === 0) {
+                todayDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No consultations scheduled for today.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.today_appointments.forEach(v => {
+                    html += `
+                        <tr>
+                            <td><strong>${v.patient_name}</strong></td>
+                            <td>${v.time}</td>
+                            <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
+                            <td>
+                                <button onclick="openRecordModal(${v.patient_id}, '${v.patient_name}')" class="btn-action-edit">Add Diagnostic</button>
+                                <button onclick="cancelAppointment(${v.id}, 'doctor')" class="btn-action-cancel">Cancel</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                todayDiv.innerHTML = html;
+            }
+
+            // All scheduled bookings
+            const upDiv = document.getElementById("doctor-upcoming");
+            if (data.upcoming_appointments.length === 0) {
+                upDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No upcoming bookings scheduled.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.upcoming_appointments.forEach(v => {
+                    html += `
+                        <tr>
+                            <td><strong>${v.patient_name}</strong></td>
+                            <td>${formatDate(v.date)}</td>
+                            <td>${v.time}</td>
+                            <td><span class="badge ${v.status.toLowerCase()}">${v.status}</span></td>
+                            <td>
+                                <button onclick="openRecordModal(${v.patient_id}, '${v.patient_name}')" class="btn-action-edit">Add Diagnostic</button>
+                                <button onclick="cancelAppointment(${v.id}, 'doctor')" class="btn-action-cancel">Cancel</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                upDiv.innerHTML = html;
+            }
+
+            // Patients History
+            const patientsDiv = document.getElementById("doctor-patients");
+            if (data.patient_history.length === 0) {
+                patientsDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No active patient records.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Profile Details</th>
+                                <th>Recorded Diagnosis Logs</th>
+                                <th>Quick Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.patient_history.forEach(p => {
+                    let rHtml = "";
+                    if (p.records.length === 0) {
+                        rHtml = "<span style='color: var(--text-muted); font-size: 0.8rem;'>No history logged.</span>";
+                    } else {
+                        p.records.forEach(r => {
+                            rHtml += `
+                                <div style="margin-bottom: 0.5rem; border-left: 2px solid var(--primary); padding-left: 0.5rem;">
+                                    <div style="font-weight: 700; font-size: 0.85rem;">${r.diagnosis} (${formatDate(r.visit_date)})</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted)">Rx: ${r.prescription || 'None'}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `
+                        <tr>
+                            <td><strong>${p.name}</strong></td>
+                            <td>Age: ${p.age || 'N/A'}, ${p.gender || 'N/A'}<br><span style='color: var(--text-muted); font-size: 0.8rem;'>Notes: ${p.medical_notes || 'None'}</span></td>
+                            <td>${rHtml}</td>
+                            <td><button onclick="openRecordModal(${p.id}, '${p.name}')" class="btn-action-edit">New Record</button></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                patientsDiv.innerHTML = html;
+            }
+
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to load doctor console schedules.", "error");
+        }
+    }
+
+    // Submit schedule configuration
+    document.getElementById("doctor-schedule-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const role = localStorage.getItem("userRole");
+        const docId = document.getElementById("doctor-schedule-form").dataset.docId;
+        const formData = new FormData(e.target);
+        
+        try {
+            // Find doctor id by fetching me first, or doctor profile contains it.
+            const statsResp = await fetchWithAuth("/api/dashboard/doctor");
+            const stats = await statsResp.json();
+            const id = stats.doctor_profile.id;
+
+            const response = await fetchWithAuth(`/api/doctors/${id}`, {
+                method: "PUT",
+                body: formData
+            });
+            if (response.ok) {
+                showToast("Schedule and availability updated!", "success");
+                loadDoctorDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Update failed", "error");
+            }
+        } catch (err) {
+            showToast("Error updating schedule availability.", "error");
+        }
+    });
+
+    // Medical record modals
+    function openRecordModal(patientId, patientName) {
+        document.getElementById("record-patient-id").value = patientId;
+        document.getElementById("record-patient-name").value = patientName;
+        // set default today
+        document.getElementById("record-visit-date").value = new Date().toISOString().split('T')[0];
+        document.getElementById("modal-record").classList.remove("hidden");
+    }
+
+    function closeRecordModal() {
+        document.getElementById("modal-record").classList.add("hidden");
+        document.getElementById("doc-record-form").reset();
+    }
+
+    document.getElementById("doc-record-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        try {
+            const response = await fetchWithAuth("/api/medical-records", {
+                method: "POST",
+                body: formData
+            });
+            if (response.ok) {
+                showToast("Medical diagnosis record created!", "success");
+                closeRecordModal();
+                loadDoctorDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Creation failed", "error");
+            }
+        } catch (err) {
+            showToast("Error submitting medical file.", "error");
+        }
+    });
+
+    // =============================================
+    // ADMIN DASHBOARD SCRIPTS
+    // =============================================
+    async function loadAdminDashboard() {
+        try {
+            const response = await fetchWithAuth("/api/dashboard/admin");
+            if (!response.ok) throw new Error("Fetch stats failed");
+            const data = await response.json();
+
+            // Populate stats counters
+            document.getElementById("stat-patients").textContent = data.stats.total_patients;
+            document.getElementById("stat-doctors").textContent = data.stats.total_doctors;
+            document.getElementById("stat-appointments").textContent = data.stats.total_appointments;
+            document.getElementById("stat-pending").textContent = data.stats.upcoming_appointments;
+
+            // Clinic Doctors list table
+            const doctorsDiv = document.getElementById("admin-doctors");
+            if (data.doctors.length === 0) {
+                doctorsDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No doctors registered in system.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Qualification</th>
+                                <th>Availability Grid</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                data.doctors.forEach(d => {
+                    html += `
+                        <tr>
+                            <td><strong>${d.name}</strong><br><span style="color: var(--text-muted); font-size: 0.8rem;">${d.email}</span></td>
+                            <td>${d.specialization}</td>
+                            <td>${d.qualification}</td>
+                            <td><span style="font-size: 0.8rem; color: var(--primary)">${d.available_days}</span><br><span style="font-size: 0.75rem; color: var(--text-muted)">Slots: ${d.available_time_slots}</span></td>
+                            <td>
+                                <button onclick="openDoctorModal(${d.id}, '${d.phone}', '${d.specialization}', '${d.qualification}', '${d.available_days}', '${d.available_time_slots}')" class="btn-action-edit">Edit</button>
+                                <button onclick="deleteDoctor(${d.id})" class="btn-action-cancel">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                doctorsDiv.innerHTML = html;
+            }
+
+            // User accounts
+            const usersDiv = document.getElementById("admin-users");
+            let uHtml = `
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            data.users.forEach(u => {
+                uHtml += `
+                    <tr>
+                        <td><strong>${u.name}</strong></td>
+                        <td>${u.email}</td>
+                        <td><span class="badge ${u.role === 'admin' ? 'confirmed' : u.role === 'doctor' ? 'scheduled' : 'completed'}">${u.role.toUpperCase()}</span></td>
+                    </tr>
+                `;
+            });
+            uHtml += `</tbody></table>`;
+            usersDiv.innerHTML = uHtml;
+
+            // Load reminder log logs
+            loadReminderLogs();
+
+        } catch (e) {
+            console.error(e);
+            showToast("Failed to load clinic administrator configurations.", "error");
+        }
+    }
+
+    async function loadReminderLogs() {
+        try {
+            const resp = await fetchWithAuth("/api/reminders/logs");
+            const logs = await resp.json();
+            const remDiv = document.getElementById("admin-reminders");
+
+            if (logs.length === 0) {
+                remDiv.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No reminders logged in history.</p>`;
+            } else {
+                let html = `
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Sent Date</th>
+                                <th>Details</th>
+                                <th>Reminder Notification text</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                logs.slice(0, 10).forEach(l => { // Limit to 10 logs for visual space
+                    html += `
+                        <tr>
+                            <td><span style="font-size: 0.75rem">${formatDate(l.sent_at)}</span></td>
+                            <td>Patient: ${l.patient}<br>Doc: ${l.doctor}</td>
+                            <td><span style="font-size: 0.8rem; color: var(--text-muted)">${l.message}</span></td>
+                            <td><span class="badge confirmed">${l.status}</span></td>
+                        </tr>
+                    `;
+                });
+                html += `</tbody></table>`;
+                remDiv.innerHTML = html;
+            }
+        } catch (e) {
+            console.error("Reminder loading failed", e);
+        }
+    }
+
+    // Trigger reminding services
+    async function triggerReminders() {
+        try {
+            const response = await fetchWithAuth("/api/reminders/trigger", {
+                method: "POST"
+            });
+            const data = await response.json();
+            showToast(data.message || "Reminders scanned and triggered!", "success");
+            loadReminderLogs();
+        } catch (e) {
+            showToast("Failed to run automated reminder logs.", "error");
+        }
+    }
+
+    // Edit doctor modal
+    function openDoctorModal(id, phone, specialization, qualification, days, slots) {
+        document.getElementById("edit-doc-id").value = id;
+        document.getElementById("edit-doc-phone").value = phone;
+        document.getElementById("edit-doc-specialization").value = specialization;
+        document.getElementById("edit-doc-qualification").value = qualification;
+        document.getElementById("edit-doc-days").value = days;
+        document.getElementById("edit-doc-slots").value = slots;
+        document.getElementById("modal-doctor").classList.remove("hidden");
+    }
+
+    function closeDoctorModal() {
+        document.getElementById("modal-doctor").classList.add("hidden");
+        document.getElementById("edit-doctor-form").reset();
+    }
+
+    // Submit doctor edit
+    document.getElementById("edit-doctor-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("edit-doc-id").value;
+        const formData = new FormData(e.target);
+        try {
+            const response = await fetchWithAuth(`/api/doctors/${id}`, {
+                method: "PUT",
+                body: formData
+            });
+            if (response.ok) {
+                showToast("Doctor profile updated successfully!", "success");
+                closeDoctorModal();
+                loadAdminDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Update failed", "error");
+            }
+        } catch (err) {
+            showToast("Error updating doctor profile.", "error");
+        }
+    });
+
+    // Delete doctor
+    async function deleteDoctor(id) {
+        if (!confirm("Are you sure you want to permanently delete this doctor's profile and user account?")) {
+            return;
+        }
+        try {
+            const response = await fetchWithAuth(`/api/doctors/${id}`, {
+                method: "DELETE"
+            });
+            if (response.ok) {
+                showToast("Doctor successfully deleted from system.", "success");
+                loadAdminDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Deletion failed", "error");
+            }
+        } catch (e) {
+            showToast("Error deleting doctor.", "error");
+        }
+    }
+
+    // Add Doctor Form Submit
+    document.getElementById("admin-add-doctor-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        try {
+            const response = await fetchWithAuth("/api/doctors", {
+                method: "POST",
+                body: formData
+            });
+            if (response.ok) {
+                showToast("New Doctor registered successfully!", "success");
+                document.getElementById("admin-add-doctor-form").reset();
+                loadAdminDashboard();
+            } else {
+                const err = await response.json();
+                showToast(err.detail || "Creation failed", "error");
+            }
+        } catch (err) {
+            showToast("Error registering new doctor profile.", "error");
+        }
+    });
+
+    // =============================================
+    // GENERAL CORE FUNCTIONS
+    // =============================================
+    async function cancelAppointment(id, roleContext) {
+        if (!confirm("Are you sure you want to cancel this appointment slot?")) {
+            return;
+        }
+
+        try {
+            const response = await fetchWithAuth(`/appointments/${id}`, {
+                method: "DELETE"
+            });
+            if (response.ok) {
+                showToast("Appointment successfully cancelled.", "success");
+                if (roleContext === "patient") {
+                    loadPatientDashboard();
+                } else if (roleContext === "doctor") {
+                    loadDoctorDashboard();
+                } else {
+                    loadAdminDashboard();
+                }
+            } else {
+                const data = await response.json();
+                showToast(data.detail || "Cancellation failed. Please try again.", "error");
+            }
+        } catch (error) {
+            console.error("Error cancelling:", error);
+            showToast("An unexpected error occurred. Please check network connection.", "error");
+        }
+    }
+</script>
+{% endblock %}

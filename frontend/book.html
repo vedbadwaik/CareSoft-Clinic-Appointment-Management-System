@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - CareSoft Clinic{% endblock %}
+
+{% block extra_css %}
+.schedule-info-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(15, 118, 110, 0.05);
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    font-size: 0.875rem;
+}
+.schedule-info-title {
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.35rem;
+}
+.schedule-info-days {
+    color: var(--text-main);
+    font-weight: 600;
+}
+.schedule-info-slots {
+    color: var(--text-muted);
+}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">Book Appointment</h2>
+    <p class="card-subtitle">Select your details below to schedule a session with a doctor.</p>
+
+    <form id="book-form">
+        <!-- Patient Name is pre-filled but hidden or read-only since auth dictates it -->
+        <div class="form-group">
+            <label class="form-label" for="patient_name">Patient Name</label>
+            <input type="text" id="patient_name" name="patient_name" class="form-control" readonly required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="doctor_id">Choose Doctor / Specialty</label>
+            <select id="doctor_id" name="doctor_id" class="form-control" required style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25rem;">
+                <option value="" disabled selected>Loading doctors...</option>
+            </select>
+        </div>
+
+        <!-- Schedule info display for selected doctor -->
+        <div id="doctor-schedule-info" class="schedule-info-box hidden">
+            <div class="schedule-info-title">Doctor's Schedule</div>
+            <div>Days: <span id="avail-days" class="schedule-info-days">-</span></div>
+            <div>Hours: <span id="avail-slots" class="schedule-info-slots">-</span></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.25rem;">
+            <label class="form-label" for="date">Select Date</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="time">Select Time Slot</label>
+            <select id="time" name="time" class="form-control" required>
+                <option value="" disabled selected>Select doctor first...</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-submit">Confirm Booking</button>
+    </form>
+</div>
+
+<script>
+    // Guard route: if user is not logged in, redirect them to login
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!localStorage.getItem("token")) {
+            showToast("Please log in to book an appointment.", "error");
+            setTimeout(() => {
+                window.location.href = "/login-page";
+            }, 1000);
+            return;
+        }
+
+        // Set min date to today so they cannot book past dates
+        const dateInput = document.getElementById("date");
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+
+        // Pre-populate patient name from localStorage
+        const userName = localStorage.getItem("userName");
+        if (userName) {
+            document.getElementById("patient_name").value = userName;
+        }
+
+        loadDoctors();
+    });
+
+    // Load available doctors from db
+    async function loadDoctors() {
+        const docSelect = document.getElementById("doctor_id");
+        try {
+            const response = await fetchWithAuth("/api/doctors");
+            if (!response.ok) throw new Error("Failed to fetch doctors");
+            
+            const doctors = await response.json();
+            
+            docSelect.innerHTML = '<option value="" disabled selected>Select a Doctor...</option>';
+            doctors.forEach(doc => {
+                const opt = document.createElement("option");
+                opt.value = doc.id;
+                opt.textContent = `${doc.name} (${doc.specialization})`;
+                opt.dataset.days = doc.available_days;
+                opt.dataset.slots = doc.available_time_slots;
+                docSelect.appendChild(opt);
+            });
+        } catch (error) {
+            console.error("Error loading doctors:", error);
+            showToast("Failed to load doctor listings.", "error");
+        }
+    }
+
+    // Populate slot info on doctor change
+    document.getElementById("doctor_id").addEventListener("change", (e) => {
+        const opt = e.target.selectedOptions[0];
+        const infoDiv = document.getElementById("doctor-schedule-info");
+        const timeSelect = document.getElementById("time");
+        
+        if (!opt || !opt.value) {
+            infoDiv.classList.add("hidden");
+            return;
+        }
+        
+        const days = opt.dataset.days;
+        const slots = opt.dataset.slots;
+        
+        document.getElementById("avail-days").textContent = days;
+        document.getElementById("avail-slots").textContent = slots.split(",").join(", ");
+        infoDiv.classList.remove("hidden");
+        
+        // Populate slots dropdown
+        timeSelect.innerHTML = '<option value="" disabled selected>Select Time Slot...</option>';
+        slots.split(",").forEach(slot => {
+            const val = slot.trim();
+            if (val) {
+                const timeOpt = document.createElement("option");
+                timeOpt.value = val;
+                timeOpt.textContent = val;
+                timeSelect.appendChild(timeOpt);
+            }
+        });
+    });
+
+    document.getElementById("book-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const btnSubmit = document.getElementById("btn-submit");
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Booking slot...";
+
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetchWithAuth("/book", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                showToast("Appointment booked successfully!", "success");
+                setTimeout(() => {
+                    window.location.href = "/dashboard-page";
+                }, 1500);
+            } else {
+                showToast(data.detail || data.message || "Failed to book appointment.", "error");
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Confirm Booking";
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            showToast("An unexpected error occurred. Please check your connection.", "error");
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Confirm Booking";
+        }
+    });
+</script>
+{% endblock %}
